@@ -130,6 +130,84 @@ class Ebonix_Gateway {
         return $result;
     }
 
+
+    // ─────────────────────────────────────────────────────────────────────────────
+// SELFIE TRANSFORMATION
+// Sends base64 image to Python gateway for:
+//   1. Gemini Vision detection (Black vs non-Black)
+//   2. Appropriate prompt construction
+//   3. Fal FLUX.1 Kontext transformation
+// Returns: ['success' => true,  'image_urls' => ['https://...']]
+//       OR ['success' => false, 'error'      => 'message']
+// ─────────────────────────────────────────────────────────────────────────────
+public static function transform_selfie(
+    string $image_b64,
+    string $mime_type,
+    string $style_preset,
+    string $additional_prompt = ''
+): array {
+
+    if (!self::enabled()) {
+        return ['success' => false, 'error' => 'Gateway not enabled'];
+    }
+
+    $gateway_url   = rtrim((string)qa_opt('gateway_url'), '/');
+    $gateway_token = (string)qa_opt('gateway_token');
+
+    $payload = [
+        'image_b64'         => $image_b64,
+        'mime_type'         => $mime_type,
+        'style_preset'      => $style_preset,
+        'additional_prompt' => trim($additional_prompt),
+    ];
+
+    error_log("Gateway::transform_selfie style={$style_preset} mime={$mime_type} b64_len=" . strlen($image_b64));
+
+    $headers = ['Content-Type: application/json', 'Accept: application/json'];
+    if (!empty($gateway_token)) {
+        $headers[] = 'Authorization: Bearer ' . $gateway_token;
+    }
+
+    $ch = curl_init($gateway_url . '/transform_selfie');
+    curl_setopt($ch, CURLOPT_POST,          true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS,    json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER,    $headers);
+    curl_setopt($ch, CURLOPT_TIMEOUT,       660);  // 11 min — Fal polls up to 7.5 min
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+
+    $raw      = curl_exec($ch);
+    $http     = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curl_err = curl_error($ch);
+    curl_close($ch);
+
+    if (!empty($curl_err)) {
+        error_log("Gateway::transform_selfie CURL error: {$curl_err}");
+        return ['success' => false, 'error' => 'Gateway connection failed: ' . $curl_err];
+    }
+
+    if ($http !== 200) {
+        error_log("Gateway::transform_selfie HTTP {$http}: " . substr((string)$raw, 0, 400));
+        $decoded = @json_decode((string)$raw, true);
+        return [
+            'success' => false,
+            'error'   => $decoded['error'] ?? $decoded['detail'] ?? "Gateway HTTP {$http}",
+        ];
+    }
+
+    $result = @json_decode((string)$raw, true);
+
+    if (empty($result['success'])) {
+        $msg = $result['error'] ?? 'Gateway returned no result';
+        error_log("Gateway::transform_selfie: failed — {$msg}");
+        return ['success' => false, 'error' => $msg];
+    }
+
+    $count = count($result['image_urls'] ?? []);
+    error_log("Gateway::transform_selfie: OK — {$count} image(s) detected_black=" . ($result['detected_black'] ? 'yes' : 'no'));
+    return $result;
+}
+
     // ─────────────────────────────────────────────────────────────────────────
     // VIDEO GENERATION
     // ─────────────────────────────────────────────────────────────────────────

@@ -303,6 +303,7 @@
 	
 		'veo' => 'Veo 3',
 		'king_aivid' => 'AI Video',
+'attach_ref_image' => 'Attach Reference Image',
  
 
 

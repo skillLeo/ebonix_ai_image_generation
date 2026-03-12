@@ -77,6 +77,7 @@
 		'x_down_votes' => '^ down votes',
 		'x_up_votes' => '^ up votes',
 		'x_with_best_chosen' => ' (^ with best Comment chosen)',
+		
 	);
 	
 
