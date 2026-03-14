@@ -37,7 +37,7 @@ if (!Ebonix_Gateway::enabled()) {
     echo "\nTo enable:\n";
     echo "1. Go to Admin Panel > Gateway Settings\n";
     echo "2. Enable gateway\n";
-    echo "3. Set URL: http://localhost:8000\n";
+    echo "3. Set URL: https://ebonix.ai\n";
     echo "4. Set Token: ebonix_secret_12345\n";
 } else {
     echo "⏳ Attempting to generate image...\n\n";

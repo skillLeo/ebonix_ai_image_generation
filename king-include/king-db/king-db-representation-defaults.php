@@ -49,7 +49,7 @@ function ebonix_install_representation_defaults() {
         
         // Gateway defaults (disabled by default)
         qa_opt_set('gateway_enabled', false);
-        qa_opt_set('gateway_url', 'http://localhost:8000');
+        qa_opt_set('gateway_url', 'https://ebonix.ai');
         qa_opt_set('gateway_token', '');
     }
 }

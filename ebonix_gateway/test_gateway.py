@@ -6,7 +6,7 @@ import requests
 import json
 
 # Gateway settings
-GATEWAY_URL = "http://localhost:8000"
+GATEWAY_URL = "https://ebonix.ai"
 GATEWAY_TOKEN = "ebonix_secret_12345"
 
 def test_gateway_health():

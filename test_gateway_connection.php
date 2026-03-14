@@ -1,7 +1,7 @@
 <?php
 // Quick test - run from command line: php test_gateway_connection.php
 
-$gateway_url = "http://localhost:8000";
+$gateway_url = "https://ebonix.ai/";
 $token = "ebonix_secret_12345";
 
 echo "Testing gateway connection...\n\n";
